@@ -17,7 +17,18 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
 });
 
-console.log(uri);
+// Async Function
+
+async function run() {
+  try {
+    await client.connect();
+    console.log("Database connect sucessfully");
+  } finally {
+    // await client.close();
+  }
+}
+
+run().catch(console.dir);
 
 // ---------------------------------
 // ---------------------------------
