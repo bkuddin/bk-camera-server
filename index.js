@@ -1,5 +1,6 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
+const ObjectId = require("mongodb").ObjectId;
 const cors = require("cors");
 const { json } = require("express");
 require("dotenv").config();
@@ -22,7 +23,39 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-    console.log("Database connect sucessfully");
+    const database = client.db("bkCameras");
+    const camerasCollection = database.collection("cameras");
+
+    // API POST
+    app.post("/addCameras", async (req, res) => {
+      const camera = req.body;
+      const result = await camerasCollection.insertOne(camera);
+      console.log(result);
+      res.json(result);
+    });
+
+    // API GET For Explore Page
+    app.get("/allCameras", async (req, res) => {
+      const cursor = camerasCollection.find({});
+      const cameras = await cursor.toArray();
+      res.send(cameras);
+    });
+
+    // API GET For Cameras Page
+    app.get("/cameras", async (req, res) => {
+      const cursor = camerasCollection.find({});
+      const cameras = await cursor.limit(8).toArray();
+      res.send(cameras);
+    });
+
+    // API GET For Single ID
+    app.get("/allCameras/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await camerasCollection.findOne(query);
+      console.log(result);
+      res.json(result);
+    });
   } finally {
     // await client.close();
   }
