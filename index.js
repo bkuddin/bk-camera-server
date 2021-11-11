@@ -25,6 +25,7 @@ async function run() {
     await client.connect();
     const database = client.db("bkCameras");
     const camerasCollection = database.collection("cameras");
+    const ordersCollection = database.collection("orders");
 
     // API POST
     app.post("/addCameras", async (req, res) => {
@@ -53,6 +54,15 @@ async function run() {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await camerasCollection.findOne(query);
+      console.log(result);
+      res.json(result);
+    });
+
+    // API POST for Order
+
+    app.post("/orders", async (req, res) => {
+      const order = req.body;
+      const result = await ordersCollection.insertOne(order);
       console.log(result);
       res.json(result);
     });
