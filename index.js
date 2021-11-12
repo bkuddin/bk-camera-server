@@ -29,7 +29,7 @@ async function run() {
     const reviewsCollection = database.collection("reviews");
     const usersCollection = database.collection("users");
 
-    // API POST
+    // API POST (Admin)
     app.post("/addCameras", async (req, res) => {
       const camera = req.body;
       const result = await camerasCollection.insertOne(camera);
@@ -37,21 +37,57 @@ async function run() {
       res.json(result);
     });
 
-    // API GET For Explore Page
+    // API GET For Explore Page (Admin)
     app.get("/allCameras", async (req, res) => {
       const cursor = camerasCollection.find({});
       const cameras = await cursor.toArray();
       res.send(cameras);
     });
 
-    // API GET For Cameras Page
+    // API Delete : For Manage Cameras Page (Admin)
+    app.delete("/allCameras/:id", async (req, res) => {
+      console.log(req.params.id);
+      const result = await camerasCollection.deleteOne({
+        _id: ObjectId(req.params.id),
+      });
+      // console.log(result);
+      res.json(result);
+    });
+
+    // API PUT: for Manage Cameras Update
+
+    app.put("/allCameras/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedInfo = req.body;
+
+      console.log(updatedInfo);
+
+      const result = await camerasCollection.updateOne(
+        { _id: id },
+        {
+          $set: {
+            brand: updatedInfo.brand,
+            model: updatedInfo.model,
+            options: updatedInfo.options,
+            brief: updatedInfo.brief,
+            description: updatedInfo.description,
+            price: updatedInfo.price,
+            img: updatedInfo.img,
+          },
+        }
+      );
+      console.log(result);
+      res.json(result);
+    });
+
+    // API GET For Cameras Page (Limit Version; Admin)
     app.get("/cameras", async (req, res) => {
       const cursor = camerasCollection.find({});
       const cameras = await cursor.limit(8).toArray();
       res.send(cameras);
     });
 
-    // API GET For Single ID
+    // API GET: For showing a Single ID information in details, (Here in this project we show via Order page)
     app.get("/allCameras/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -69,7 +105,36 @@ async function run() {
       res.json(result);
     });
 
-    // API GET for My Order Page, through specific email
+    // API GET: For Manage Order Page (Admin)
+    app.get("/allOrders", async (req, res) => {
+      const cursor = ordersCollection.find({});
+      const orders = await cursor.toArray();
+      res.send(orders);
+    });
+
+    // API Delete : For Manage Order Page (Admin)
+    app.delete("/allOrders/:id", async (req, res) => {
+      console.log(req.params.id);
+      const result = await ordersCollection.deleteOne({
+        _id: ObjectId(req.params.id),
+      });
+      // console.log(result);
+      res.json(result);
+    });
+    // API PUT : For Manage Order Page (Admin)
+    app.put("/statusUpdate/:id", async (req, res) => {
+      const filter = { _id: ObjectId(req.params.id) };
+      console.log(req.params.id);
+      const result = await ordersCollection.updateOne(filter, {
+        $set: {
+          status: req.body.status,
+        },
+      });
+      res.send(result);
+      console.log(result);
+    });
+
+    // API GET for My Order Page, through specific email (User)
     app.get("/orders/:email", async (req, res) => {
       console.log(req.params.email);
 
@@ -80,7 +145,7 @@ async function run() {
       res.json(result);
     });
 
-    // Delete API for My Order Page,
+    // Delete API for My Order Page, (user)
     app.delete("/orders/:id", async (req, res) => {
       console.log(req.params.id);
       const result = await ordersCollection.deleteOne({
